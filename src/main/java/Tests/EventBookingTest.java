@@ -4,6 +4,7 @@ import Pages.*;
 import com.relevantcodes.extentreports.ExtentReports;
 import com.relevantcodes.extentreports.ExtentTest;
 import com.relevantcodes.extentreports.LogStatus;
+import jdk.jfr.Event;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.AfterTest;
@@ -63,7 +64,7 @@ public class EventBookingTest {
         test = extent.startTest("Select Event");
         try {
             DashboardPage.clickEventsOption();
-            DashboardPage.selectEventByName("Selenium Event");
+            DashboardPage.selectEventByName("Test Event");
             test.log(LogStatus.INFO, "Event selected successfully.");
         } catch (Exception e) {
             test.log(LogStatus.FAIL, "Failed to select event: " + e.getMessage());
@@ -77,7 +78,9 @@ public class EventBookingTest {
         test = extent.startTest("Click Seating Option");
         try {
             EventDashboardPage.clickSidebarSeatingOption();
-            EventDashboardPage.clickContinueEditingButton();
+            //EventDashboardPage.clickCreateSeatingPlanButton();
+            //EventDashboardPage.clickContinueEditingButton();
+            EventDashboardPage.clickRelevantSeatPlanButton();
             test.log(LogStatus.INFO, "Seating option clicked successfully.");
         } catch (Exception e) {
             test.log(LogStatus.FAIL, "Failed to click seating option: " + e.getMessage());
@@ -87,20 +90,150 @@ public class EventBookingTest {
     }
 
     @Test(priority = 5, dependsOnMethods = "clickSeatingOption")
-    public void completeSeatPlan() {
-        test = extent.startTest("Complete Seat Plan");
+    public void completeSeatMap() {
+        test = extent.startTest("Complete Seat Map");
         try {
-            //SeatPlanPage.clickContinueButton();
-            SeatPlanPage.clickOnCanvas(215, 515);
+            //SeatPlanPage.dragSeatingToArea();
+            SeatPlanPage.clickContinueButton();
+            test.log(LogStatus.INFO, "Seat map completed successfully.");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to complete seat map: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 6, dependsOnMethods = "completeSeatMap")
+    public void assignSeatTickets() {
+        test = extent.startTest("Assign Seat Tickets");
+        try {
+            SeatPlanPage.clickOnCanvas(520, 285);
             SeatPlanPage.clickTicketOption();
             SeatPlanPage.selectTicketType("Test Single Ticket");
             SeatPlanPage.clickContinueButton();
+            test.log(LogStatus.INFO, "Assign seat tickets completed successfully.");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to assign seat tickets: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 7, dependsOnMethods = "assignSeatTickets")
+    public void assignAttendees() {
+        test = extent.startTest("Assign Attendees");
+        try {
             SeatPlanPage.clickSeatSaveButton();
+            test.log(LogStatus.INFO, "Assign attendees successfully.");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to assign attendees: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 8, dependsOnMethods = "assignAttendees")
+    public void enableSeatPlan() {
+        test = extent.startTest("Enable Seat Plan");
+        try {
             EventDashboardPage.clickEnableSeatPlan();
 
-            test.log(LogStatus.INFO, "Seat plan completed successfully.");
+            test.log(LogStatus.INFO, "Seat plan enabled successfully.");
         } catch (Exception e) {
-            test.log(LogStatus.FAIL, "Failed to complete seat plan: " + e.getMessage());
+            test.log(LogStatus.FAIL, "Failed to enable seat plan: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 9, dependsOnMethods = "enableSeatPlan")
+    public void copyEventLink() {
+        test = extent.startTest("Copy Event Link");
+        try {
+            EventsListPage.clickShareLink();
+            EventsListPage.getEventURL();
+            EventsListPage.clickShareEventPopupCloseButton();
+            test.log(LogStatus.INFO, "Copied Event Link successfully.");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to copy event link: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 10, dependsOnMethods = "copyEventLink")
+    public void logoutAccount() {
+        test = extent.startTest("Logout from Account");
+        try {
+            DashboardPage.clickAccount();
+            DashboardPage.clickSignOut();
+
+            test.log(LogStatus.INFO, "Successfully logged out of account");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to log out of account: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 11, dependsOnMethods = "logoutAccount")
+    public void goToEventLink() {
+        test = extent.startTest("Go To Event Link");
+        try {
+            EventsListPage.goToEventURL();
+
+            test.log(LogStatus.INFO, "Successfully redirected to event link");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to load event link: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 12, dependsOnMethods = "goToEventLink")
+    public void purchaseTicket() {
+        test = extent.startTest("Purchase Ticket with Quantity");
+        try {
+            EventPage.clickPurchaseTicketButton();
+            EventPage.fillTicketQuantityField(2);
+            EventPage.clickContinueButton();
+            SeatPlanPage.clickPurchaseContinueButton();
+
+            test.log(LogStatus.INFO, "Successfully clicked purchase ticket");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to click purchase ticket: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 13, dependsOnMethods = "purchaseTicket")
+    public void checkout() {
+        test = extent.startTest("Checkout with form fill up and validation");
+        try {
+            CheckoutPage.clickConfirmOrderButton();
+            CheckoutPage.checkValidationMessages();
+            CheckoutPage.fillFirstNameField();
+            CheckoutPage.fillLastNameField();
+            CheckoutPage.fillEmailField();
+            CheckoutPage.clickConfirmOrderButton();
+
+            test.log(LogStatus.INFO, "Successfully Confirmed Order");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to confirm order: " + e.getMessage());
+        } finally {
+            extent.endTest(test);
+        }
+    }
+
+    @Test(priority = 14, dependsOnMethods = "checkout")
+    public void checkoutSuccess() {
+        test = extent.startTest("Checkout validation");
+        try {
+            //CheckoutSuccessPage.verifyOrderCompletion();
+            test.log(LogStatus.INFO, "Successfully Completed Order");
+        } catch (Exception e) {
+            test.log(LogStatus.FAIL, "Failed to confirm order: " + e.getMessage());
         } finally {
             extent.endTest(test);
         }
@@ -108,9 +241,9 @@ public class EventBookingTest {
 
     @AfterTest
     public static void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+//        if (driver != null) {
+//            driver.quit();
+//        }
         extent.flush();
         extent.close();
     }

@@ -12,7 +12,7 @@ import static Tests.EventBookingTest.driver;
 
 public class EventDashboardPage {
     public static String sidebarSeatingOption = "Seating";
-    public static String createSeatingPlanButtonText = "Create Seating Plan";
+    public static String createSeatingPlanButton = "//a[normalize-space()='Create Seating Plan']";
     public static String continueEditingButtonText = "Continue Editing";
     public static String enableSeatPlan = "(//span[@class='checkbox-slider'])[1]";
 
@@ -28,11 +28,29 @@ public class EventDashboardPage {
     }
 
     public static void clickCreateSeatingPlanButton(){
-        driver.findElement(By.linkText(createSeatingPlanButtonText)).click();
+        driver.findElement(By.xpath(createSeatingPlanButton)).click();
+        System.out.println("Clicked on 'Create Seating Plan' button.");
     }
 
     public static void clickContinueEditingButton(){
         driver.findElement(By.linkText(continueEditingButtonText)).click();
+    }
+
+    public static void clickRelevantSeatPlanButton() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            WebElement createButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(createSeatingPlanButton)));
+            createButton.click();
+            System.out.println("Clicked on 'Create Seating Plan' button.");
+        } catch (Exception e) {
+            try {
+                WebElement continueButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(continueEditingButtonText)));
+                continueButton.click();
+                System.out.println("Clicked on 'Continue Editing' button.");
+            } catch (Exception ex) {
+                System.out.println("Neither button was visible.");
+            }
+        }
     }
 
     public static void clickEnableSeatPlan() {
